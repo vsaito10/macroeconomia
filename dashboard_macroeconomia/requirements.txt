@@ -1,0 +1,6 @@
+streamlit
+lightweight-charts
+yfinance
+pandas_ta
+ipeadatapy
+python-bcb
