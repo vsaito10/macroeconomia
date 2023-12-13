@@ -9,13 +9,15 @@ import functions
 
 st.sidebar.title('Indicadores')
 
-br_option = st.sidebar.selectbox('Brasil', ('Curva de Juros', 
-                                            'Inflação',
-                                            'CAGED',
-                                            'PNAD Contínua',
-                                            'Expectativas FOCUS',
-                                            'PIB',
-                                            'EMBI'
+br_option = st.sidebar.selectbox('Brasil', (
+    'Escolha um indicador',
+    'Curva de Juros', 
+    'Inflação',
+    'CAGED',
+    'PNAD Contínua',
+    'Expectativas FOCUS',
+    'PIB',
+    'EMBI'
 ))
 
 if br_option == 'Curva de Juros':
@@ -102,19 +104,44 @@ elif br_option == 'Expectativas FOCUS':
 
 elif br_option == 'PIB':
     # Dados PIB
-    df_pib_acum = get_data.pib()[0]
-    df_pib_var = get_data.pib()[1]
-    fig_pib_acum = get_data.pib()[2]
-    fig_pib_var = get_data.pib()[3]
+    fig_var_pib_trimestral = get_data.variacao_pib_trimestral()
+    fig_var_pib_anual = get_data.variacao_pib_anual()
+    fig_var_fbcf_trimestral = get_data.variacao_fbcf_trimestral()
+    fig_var_fbcf_anual = get_data.variacao_fbcf_anual()
+    fig_var_desp_familia_trimestral = get_data.variacao_desp_familia_trimestral()
+    fig_var_desp_familia_anual = get_data.variacao_desp_familia_anual()
+    fig_var_governo_trimestral = get_data.variacao_governo_trimestral()
+    fig_var_governo_anual = get_data.variacao_governo_anual()
+    fig_variacao_acumulada_pib_consumo_fbcf = get_data.variacao_acumulada_pib_consumo_fbcf()
+    fig_otica_producao = get_data.otica_producao_demanda()[0]
+    fig_otica_demanda = get_data.otica_producao_demanda()[1]
+    fig_exportacoes_importacoes = get_data.exportacoes_importacoes()[0]
+    fig_saldo_balanca_comercial = get_data.exportacoes_importacoes()[1]
 
     # Título
     st.title('PIB')    
 
-    # Gráfico do PIB e dfs
-    st.plotly_chart(fig_pib_acum)
-    st.dataframe(df_pib_acum, width=400)
-    st.plotly_chart(fig_pib_var)
-    
+    # Gráficos do PIB
+    st.plotly_chart(fig_var_pib_trimestral)
+    st.plotly_chart(fig_var_pib_anual)
+    st.markdown('***')
+    st.plotly_chart(fig_var_fbcf_trimestral)
+    st.plotly_chart(fig_var_fbcf_anual)
+    st.markdown('***')
+    st.plotly_chart(fig_var_desp_familia_trimestral)
+    st.plotly_chart(fig_var_desp_familia_anual)
+    st.markdown('***')
+    st.plotly_chart(fig_var_governo_trimestral)
+    st.plotly_chart(fig_var_governo_anual)
+    st.markdown('***')
+    st.plotly_chart(fig_variacao_acumulada_pib_consumo_fbcf)
+    st.markdown('***')
+    st.plotly_chart(fig_otica_producao)
+    st.plotly_chart(fig_otica_demanda)
+    st.markdown('***')
+    st.plotly_chart(fig_exportacoes_importacoes)
+    st.plotly_chart(fig_saldo_balanca_comercial)
+
 elif br_option == 'EMBI':
     # Dados do 'EMBI'
     df_embi = get_data.embi()[0]

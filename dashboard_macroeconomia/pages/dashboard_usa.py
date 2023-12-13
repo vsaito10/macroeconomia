@@ -6,19 +6,21 @@ import os
 import get_data 
 import functions
 
-usa_option = st.sidebar.selectbox('Indicadores', ('Escolha um indicador', 
-                                                  'Curva de Juros', 
-                                                  'Inflação - CPI', 
-                                                  'Inflação - PCE',
-                                                  'Inflação - PPI',
-                                                  'Spread de Crédito',
-                                                  'Pedidos por Seguro-Desemprego',
-                                                  'Payroll',
-                                                  'ADP',
-                                                  'Agregados Monetários',
-                                                  'Licenças de Construção',
-                                                  'Vendas de Casas Usadas/Novas',
-                                                  'JOLTS'
+usa_option = st.sidebar.selectbox('Indicadores', (
+    'Escolha um indicador', 
+    'Curva de Juros', 
+    'Inflação - CPI', 
+    'Inflação - PCE',
+    'Inflação - PPI',
+    'Spread de Crédito',
+    'Pedidos por Seguro-Desemprego',
+    'Payroll',
+    'ADP',
+    'Agregados Monetários',
+    'Licenças de Construção',
+    'Vendas de Casas Usadas/Novas',
+    'JOLTS',
+    'GDP'
 ))
 
 if usa_option == 'Curva de Juros':
@@ -188,19 +190,36 @@ elif usa_option == 'Payroll':
 elif usa_option == 'ADP':
     # Dados do ADP
     df_adp_us = get_data.adp()[0]
-    df_adp_setores = get_data.adp()[1]
-    df_adp_setores_rank = get_data.adp()[2]
+    fig_ultimo_adp = get_data.adp()[1]
+    fig_var_mining = get_data.adp()[2]
+    fig_var_construction = get_data.adp()[3]
+    fig_var_manufacturing = get_data.adp()[4]
+    fig_var_trade = get_data.adp()[5]
+    fig_var_information = get_data.adp()[6]
+    fig_var_financial = get_data.adp()[7]
+    fig_var_professional = get_data.adp()[8]
+    fig_var_education = get_data.adp()[9]
+    fig_var_leisure = get_data.adp()[10]
+    fig_var_other = get_data.adp()[11]
 
     # Título
     st.title('ADP')
 
     # Dfs ADP
     st.dataframe(df_adp_us)
-    st.subheader('ADP setores')
-    st.dataframe(df_adp_setores)
-    st.subheader('Rank dos setores que mais contrataram')
-    st.dataframe(df_adp_setores_rank)
-
+    st.plotly_chart(fig_ultimo_adp)
+    st.subheader('ADP - Histórico do Número de Contratações de Cada Setor')
+    st.plotly_chart(fig_var_mining)
+    st.plotly_chart(fig_var_construction)
+    st.plotly_chart(fig_var_manufacturing)
+    st.plotly_chart(fig_var_trade)
+    st.plotly_chart(fig_var_information)
+    st.plotly_chart(fig_var_financial)
+    st.plotly_chart(fig_var_professional)
+    st.plotly_chart(fig_var_education)
+    st.plotly_chart(fig_var_leisure)
+    st.plotly_chart(fig_var_other)
+    
 elif usa_option == 'Agregados Monetários':
     # Dados dos 'Agregados Monetários'
     df_m1 = get_data.agregados_monetarios()[0]
@@ -248,3 +267,13 @@ elif usa_option == 'JOLTS':
 
     # Gráfico dos 'JOLTS'
     st.plotly_chart(fig_jolts)
+
+elif usa_option == 'GDP':
+    # Dados do GDP
+    fig_var_gdp = get_data.gdp()
+
+    # Título
+    st.title('GDP')
+
+    # Gráfico do GDP
+    st.plotly_chart(fig_var_gdp)
