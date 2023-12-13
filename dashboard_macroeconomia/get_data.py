@@ -9,10 +9,12 @@ import json
 import functions
 from fredapi import Fred
 import ipeadatapy
-
+import sidrapy as sidra
+import beaapi
 
 # USA
 fred = Fred(api_key=os.environ.get('FREDAPI_KEY'))
+bea_key = os.environ.get('BEA_KEY')
 
 # Curva de Juros Americana
 @st.cache_data
@@ -595,7 +597,7 @@ def payroll():
     # Atualizando os layout dos subplots
     fig.update_layout(
         height=1000,
-        width=1500,
+        width=900,
         title_text="Relatório Payroll",
         xaxis_title='Year',
         yaxis_title='Thousands of Persons'
@@ -608,9 +610,9 @@ def payroll():
     return df, fig
 
 
-# Private Average Hourly Earnings of All Employees
 @st.cache_data
 def ganho_medio_por_hora():
+    # Private Average Hourly Earnings of All Employees
     df = functions.data_bls(series_id=['CES0500000003'], 
                             start_year=2012, 
                             end_year=2023, 
@@ -637,9 +639,9 @@ def ganho_medio_por_hora():
     return df, fig
 
 
-# Taxa de desemprego
 @st.cache_data
 def taxa_desemprego():
+    # Taxa de desemprego
     df = functions.data_bls(series_id=['LNS14000000'], 
                             start_year=2012, 
                             end_year=2023, 
@@ -675,7 +677,7 @@ def adp():
     df_adp_us = pd.DataFrame(adp_us, columns=['value'])
 
     # A diferença entre os meses é o número do ADP que é mostrado nos relatórios
-    df_adp_us['diff'] = df_adp_us['value'].diff()
+    df_adp_us['adp'] = df_adp_us['value'].diff()
 
     # Setores que o ADP monitora
     # Nonfarm Private Payroll Employment for Natural Resources and Mining
@@ -727,12 +729,202 @@ def adp():
     # Calculando a diferença entre os meses de cada setor
     df_adp_setores = adp_setores.diff().dropna()
 
+    # Plotando o histórico de variação dos setores 
+    # Mining
+    fig_var_mining = go.Figure()
+
+    fig_var_mining.add_trace(go.Bar(
+        x=df_adp_setores.index, 
+        y=df_adp_setores['mining'], 
+        name='Mining'
+    ))
+
+    fig_var_mining.update_layout(
+        title='Variação do nº de empregos (ADP) - Mining',
+        xaxis_title='Data',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
+    # Construction
+    fig_var_construction = go.Figure()
+
+    fig_var_construction.add_trace(go.Bar(
+        x=df_adp_setores.index, 
+        y=df_adp_setores['construction'], 
+        name='Construction'
+    ))
+
+    fig_var_construction.update_layout(
+        title='Variação do nº de empregos (ADP) - Construction',
+        xaxis_title='Data',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
+    # Manufacturing
+    fig_var_manufacturing = go.Figure()
+
+    fig_var_manufacturing.add_trace(go.Bar(
+        x=df_adp_setores.index, 
+        y=df_adp_setores['manufacturing'], 
+        name='Manufacturing'
+    ))
+
+    fig_var_manufacturing.update_layout(
+        title='Variação do nº de empregos (ADP) - Manufacturing',
+        xaxis_title='Data',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
+    # Trade
+    fig_var_trade = go.Figure()
+
+    fig_var_trade.add_trace(go.Bar(
+        x=df_adp_setores.index, 
+        y=df_adp_setores['trade'], 
+        name='Trade'
+    ))
+
+    fig_var_trade.update_layout(
+        title='Variação do nº de empregos (ADP) - Trade',
+        xaxis_title='Data',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
+    # Information
+    fig_var_information = go.Figure()
+
+    fig_var_information.add_trace(go.Bar(
+        x=df_adp_setores.index, 
+        y=df_adp_setores['information'], 
+        name='Information'
+    ))
+
+    fig_var_information.update_layout(
+        title='Variação do nº de empregos (ADP) - Information',
+        xaxis_title='Data',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
+    # Financial
+    fig_var_financial = go.Figure()
+
+    fig_var_financial.add_trace(go.Bar(
+        x=df_adp_setores.index, 
+        y=df_adp_setores['financial'], 
+        name='Financial'
+    ))
+
+    fig_var_financial.update_layout(
+        title='Variação do nº de empregos (ADP) - Financial',
+        xaxis_title='Data',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
+    # Professional
+    fig_var_professional = go.Figure()
+
+    fig_var_professional.add_trace(go.Bar(
+        x=df_adp_setores.index, 
+        y=df_adp_setores['professional'], 
+        name='Professional'
+    ))
+
+    fig_var_professional.update_layout(
+        title='Variação do nº de empregos (ADP) - Professional',
+        xaxis_title='Data',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
+    # Education
+    fig_var_education = go.Figure()
+
+    fig_var_education.add_trace(go.Bar(
+        x=df_adp_setores.index, 
+        y=df_adp_setores['education'], 
+        name='Education'
+    ))
+
+    fig_var_education.update_layout(
+        title='Variação do nº de empregos (ADP) - Education',
+        xaxis_title='Data',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
+    # Leisure
+    fig_var_leisure = go.Figure()
+
+    fig_var_leisure.add_trace(go.Bar(
+        x=df_adp_setores.index, 
+        y=df_adp_setores['leisure'], 
+        name='Leisure'
+    ))
+
+    fig_var_leisure.update_layout(
+        title='Variação do nº de empregos (ADP) - Leisure',
+        xaxis_title='Data',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
+    # Other
+    fig_var_other = go.Figure()
+
+    fig_var_other.add_trace(go.Bar(
+        x=df_adp_setores.index, 
+        y=df_adp_setores['other'], 
+        name='Other'
+    ))
+
+    fig_var_other.update_layout(
+        title='Variação do nº de empregos (ADP) - Other',
+        xaxis_title='Data',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
     # Último dado (última linha) do df dos setores monitorados pelo ADP
     ultimo_adp = df_adp_setores.iloc[-1]
-    # Rank dos setores que mais contrataram
-    df_adp_setores_rank = pd.DataFrame(ultimo_adp.sort_values(ascending=False))
 
-    return df_adp_us, df_adp_setores, df_adp_setores_rank
+    # Ordenando de forma decrescente
+    ultimo_adp = ultimo_adp.sort_values(ascending=False)
+
+    # Plotando a variação dos setores do último ADP
+    fig_ultimo_adp = go.Figure()
+
+    fig_ultimo_adp.add_trace(go.Bar(
+        x=ultimo_adp.index,
+        y=ultimo_adp.values
+    ))
+
+    fig_ultimo_adp.update_layout(
+        title='Variação de cada setor - último ADP',
+        xaxis_title='Setores ADP',
+        yaxis_title='Nº de empregos',
+        template='seaborn'
+    )
+
+    return (
+        df_adp_us, 
+        fig_ultimo_adp,
+        fig_var_mining,
+        fig_var_construction,
+        fig_var_manufacturing,
+        fig_var_trade,
+        fig_var_information,
+        fig_var_financial,
+        fig_var_professional,
+        fig_var_education,
+        fig_var_leisure,
+        fig_var_other
+    )
 
 
 # Agregados monetários
@@ -884,6 +1076,39 @@ def jolts():
 
     return df, fig
 
+
+# GDP
+@st.cache_data
+def gdp():
+    gdp = beaapi.get_data(bea_key, datasetname='NIPA', TableName='T10101', Frequency='Q', Year='X')
+
+    # Selecionando a variação percentual do GDP
+    filt = gdp['SeriesCode'] == 'A191RL'
+    pct_gdp = gdp.loc[filt]
+
+    # Selecionando apenas as colunas principais
+    pct_gdp = pct_gdp[['TimePeriod', 'DataValue']]
+
+    # Transformando a coluna 'TimePeriod' como index
+    pct_gdp = pct_gdp.set_index('TimePeriod')
+
+
+    # Plotando a variação percentual do GDP
+    fig_var_gdp = go.Figure()
+
+    fig_var_gdp.add_trace(go.Bar(
+        x=pct_gdp.index,
+        y=pct_gdp['DataValue']
+    ))
+
+    fig_var_gdp.update_layout(
+        title='Variação Percentual GDP',
+        xaxis_title='Quarter',
+        yaxis_title='%',
+        template='seaborn'
+    )
+
+    return fig_var_gdp
 
 # BRASIL
 
@@ -1617,44 +1842,721 @@ def expectativa_focus():
 
 # PIB
 @st.cache_data
-def pib():
-    # PIB acumulado dos últimos 12 meses - valores correntes
-    df_pib_acum = functions.data_bcb(4382)
-    # Calculando a variação percentual
-    df_pib_acum['pct_changes'] = round((df_pib_acum['valor'].pct_change())*100,2)
-
-    # Plotando o 'PIB acumulado dos últimos 12 meses - valores correntes'
-    fig_pib_acum = go.Figure()
-    fig_pib_acum.add_trace(go.Scatter(
-        x=df_pib_acum.index,
-        y=df_pib_acum['valor'],
-        mode='lines',
-        name='PIB')
+def variacao_pib_trimestral():
+    # Variação da taxa trimestre contra trimestre imediatamente anterior "PIB" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6564/p/all/c11255/90707/d/v6564%201
+    var_pib_trimestral = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6564',
+        classifications={'11255':'90707'},
+        period='all',
     )
-    fig_pib_acum.update_layout(
-        title='PIB Acumulado dos Últimos 12 meses - Valores Correntes',
-        xaxis_title='Ano',
-        yaxis_title='R$',
-        template='seaborn'
-    )
+    # Selecionando as principais colunas
+    var_pib_trimestral = var_pib_trimestral[['D2C', 'V']]
+    # Retirando a primeira linha
+    var_pib_trimestral = var_pib_trimestral[1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    var_pib_trimestral['V'] = var_pib_trimestral['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    var_pib_trimestral['V'] = var_pib_trimestral['V'].astype(float)
 
-    # Taxa de Variação Real do PIB no Ano
-    df_pib_var = functions.data_bcb(7326)
+    # Plotando a 'Variação do PIB trimestral'
+    fig_var_pib_trimestral = go.Figure()
 
-    # Plotando a 'Taxa de Variação Real do PIB no Ano'
-    fig_pib_var = go.Figure()
-    fig_pib_var.add_trace(go.Bar(
-        x=df_pib_var.index,
-        y=df_pib_var['valor']
+    fig_var_pib_trimestral.add_trace(go.Bar(
+        x=var_pib_trimestral['D2C'],
+        y=var_pib_trimestral['V'],
+        name='Var. % trimestral'
     ))
-    fig_pib_var.update_layout(
-        title='Taxa de Variação Real do PIB no Ano',
-        xaxis_title='Ano',
+    
+    fig_var_pib_trimestral.update_layout(
+        title='Variação percentual do PIB trimestral',
+        xaxis_title='Trimestral',
         yaxis_title='Variação %',
         template='seaborn'
     )
 
-    return df_pib_acum, df_pib_var, fig_pib_acum, fig_pib_var  
+    return fig_var_pib_trimestral
+
+
+@st.cache_data
+def variacao_pib_anual():
+    # Variação da taxa anual (em relação ao mesmo período do ano anterior) "PIB" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6561/p/all/c11255/90707/d/v6561%201
+    var_pib_anual = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6561',
+        classifications={'11255':'90707'},
+        period='all',
+    )
+    # Selecionando as principais colunas
+    var_pib_anual = var_pib_anual[['D2C', 'V']]
+    # Retirando a primeira linha
+    var_pib_anual = var_pib_anual[1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    var_pib_anual['V'] = var_pib_anual['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    var_pib_anual['V'] = var_pib_anual['V'].astype(float)
+
+    # Plotando a 'Variação do PIB anual'
+    fig_var_pib_anual = go.Figure()
+
+    fig_var_pib_anual.add_trace(go.Bar(
+        x=var_pib_anual['D2C'],
+        y=var_pib_anual['V'],
+        name='Var. % anual'
+    ))
+
+    fig_var_pib_anual.update_layout(
+        title='Variação percentual do PIB anual',
+        xaxis_title='Trimestral',
+        yaxis_title='Variação %',
+        template='seaborn'
+    )
+
+    return fig_var_pib_anual
+
+
+@st.cache_data
+def variacao_fbcf_trimestral():
+    # Variação da taxa trimestre contra trimestre imediatamente anterior "FBCF" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6564/p/all/c11255/93406/d/v6564%201
+    var_fbcf_trimestral = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6564',
+        classifications={'11255':'93406'},
+        period='all',
+    )
+    # Selecionando as principais colunas
+    var_fbcf_trimestral = var_fbcf_trimestral[['D2C', 'V']]
+    # Retirando a primeira linha
+    var_fbcf_trimestral = var_fbcf_trimestral[1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    var_fbcf_trimestral['V'] = var_fbcf_trimestral['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    var_fbcf_trimestral['V'] = var_fbcf_trimestral['V'].astype(float)
+
+    # Plotando a variação trimestral do FBCF
+    fig_var_fbcf_trimestral = go.Figure()
+
+    fig_var_fbcf_trimestral.add_trace(go.Bar(
+        x=var_fbcf_trimestral['D2C'],
+        y=var_fbcf_trimestral['V'],
+        name='Var. % trimestral'
+    ))
+
+    fig_var_fbcf_trimestral.update_layout(
+        title='Variação percentual do FBCF trimestral',
+        xaxis_title='Trimestral',
+        yaxis_title='Variação %',
+        template='seaborn'
+    )
+
+    return fig_var_fbcf_trimestral
+
+
+@st.cache_data
+def variacao_fbcf_anual():
+    # Variação da taxa anual (em relação ao mesmo período do ano anterior) "FBCF" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6561/p/all/c11255/93406/d/v6561%201
+    var_fbcf_anual = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6561',
+        classifications={'11255':'93406'},
+        period='all',
+    )
+    # Selecionando as principais colunas
+    var_fbcf_anual = var_fbcf_anual[['D2C', 'V']]
+    # Retirando a primeira linha
+    var_fbcf_anual = var_fbcf_anual[1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    var_fbcf_anual['V'] = var_fbcf_anual['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    var_fbcf_anual['V'] = var_fbcf_anual['V'].astype(float)
+
+    # Plotando a variação anual do FBCF
+    fig_var_fbcf_anual = go.Figure()
+
+    fig_var_fbcf_anual.add_trace(go.Bar(
+        x=var_fbcf_anual['D2C'],
+        y=var_fbcf_anual['V'],
+        name='Var. % anual'
+    ))
+
+    fig_var_fbcf_anual.update_layout(
+        title='Variação percentual do FBCF anual',
+        xaxis_title='Trimestral',
+        yaxis_title='Variação %',
+        template='seaborn'
+    )
+
+    return fig_var_fbcf_anual
+
+
+@st.cache_data
+def variacao_desp_familia_trimestral():
+    # Variação da taxa trimestre contra trimestre imediatamente anterior "Despesas de consumo das famílias" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6564/p/all/c11255/93404/d/v6564%201
+    var_desp_familia_trimestral = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6564',
+        classifications={'11255':'93404'},
+        period='all',
+    )
+
+    # Selecionando as principais colunas
+    var_desp_familia_trimestral = var_desp_familia_trimestral[['D2C', 'V']]
+    # Retirando a primeira linha
+    var_desp_familia_trimestral = var_desp_familia_trimestral[1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    var_desp_familia_trimestral['V'] = var_desp_familia_trimestral['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    var_desp_familia_trimestral['V'] = var_desp_familia_trimestral['V'].astype(float)
+
+    # Plotando a variação trimestral das despesas de consumo das famílas
+    fig_var_desp_familia_trimestral = go.Figure()
+
+    fig_var_desp_familia_trimestral.add_trace(go.Bar(
+        x=var_desp_familia_trimestral['D2C'],
+        y=var_desp_familia_trimestral['V'],
+        name='Var. % trimestral'
+    ))
+
+    fig_var_desp_familia_trimestral.update_layout(
+        title='Variação percentual do consumo das famílias trimestral',
+        xaxis_title='Trimestral',
+        yaxis_title='Variação %',
+        template='seaborn'
+    )
+
+    return fig_var_desp_familia_trimestral
+
+
+@st.cache_data
+def variacao_desp_familia_anual():
+    # Variação da taxa anual (em relação ao mesmo período do ano anterior) "Despesas de consumo das famílias" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6561/p/all/c11255/93404/d/v6561%201
+    var_desp_familia_anual = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6561',
+        classifications={'11255':'93404'},
+        period='all',
+    )
+
+    # Selecionando as principais colunas
+    var_desp_familia_anual  = var_desp_familia_anual [['D2C', 'V']]
+    # Retirando a primeira linha
+    var_desp_familia_anual  = var_desp_familia_anual [1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    var_desp_familia_anual['V'] = var_desp_familia_anual ['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    var_desp_familia_anual['V'] = var_desp_familia_anual ['V'].astype(float)
+
+    # Plotando a variação anual das despesas de consumo das famílas
+    fig_var_desp_familia_anual = go.Figure()
+
+    fig_var_desp_familia_anual.add_trace(go.Bar(
+        x=var_desp_familia_anual['D2C'],
+        y=var_desp_familia_anual['V'],
+        name='Var. % anual'
+    ))
+
+    fig_var_desp_familia_anual.update_layout(
+        title='Variação percentual do consumo das famílias anual',
+        xaxis_title='Trimestral',
+        yaxis_title='Variação %',
+        template='seaborn'
+    )
+
+    return fig_var_desp_familia_anual
+
+
+@st.cache_data
+def variacao_governo_trimestral():
+    # Variação da taxa trimestre contra trimestre imediatamente anterior "Despesas de consumo do governo" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6564/p/all/c11255/93405/d/v6564%201
+    var_desp_gov_trimestral = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6564',
+        classifications={'11255':'93405'},
+        period='all',
+    )
+    
+    # Selecionando as principais colunas
+    var_desp_gov_trimestral = var_desp_gov_trimestral[['D2C', 'V']]
+    # Retirando a primeira linha
+    var_desp_gov_trimestral = var_desp_gov_trimestral[1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    var_desp_gov_trimestral['V'] = var_desp_gov_trimestral['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    var_desp_gov_trimestral['V'] = var_desp_gov_trimestral['V'].astype(float)
+
+    # Plotando a variação trimestral das despesas do governo
+    fig_var_desp_gov_trimestral = go.Figure()
+
+    fig_var_desp_gov_trimestral.add_trace(go.Bar(
+        x=var_desp_gov_trimestral['D2C'],
+        y=var_desp_gov_trimestral['V'],
+        name='Var. % trimestral'
+    ))
+
+    fig_var_desp_gov_trimestral.update_layout(
+        title='Variação percentual do consumo do governo trimestral',
+        xaxis_title='Trimestral',
+        yaxis_title='Variação %',
+        template='seaborn'
+    )
+
+    return fig_var_desp_gov_trimestral
+
+
+@st.cache_data
+def variacao_governo_anual():
+    # Variação da taxa anual (em relação ao mesmo período do ano anterior) "Despesas de consumo do governo" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6561/p/all/c11255/93405/d/v6561%201
+    var_desp_gov_anual = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6561',
+        classifications={'11255':'93405'},
+        period='all',
+    )
+
+    # Selecionando as principais colunas
+    var_desp_gov_anual  = var_desp_gov_anual [['D2C', 'V']]
+    # Retirando a primeira linha
+    var_desp_gov_anual  = var_desp_gov_anual [1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    var_desp_gov_anual['V'] = var_desp_gov_anual ['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    var_desp_gov_anual['V'] = var_desp_gov_anual ['V'].astype(float)
+
+    # Plotando a variação anual das despesas do governo
+    fig_var_desp_gov_anual = go.Figure()
+
+    fig_var_desp_gov_anual.add_trace(go.Bar(
+        x=var_desp_gov_anual['D2C'],
+        y=var_desp_gov_anual['V'],
+        name='Var. % anual'
+    ))
+
+    fig_var_desp_gov_anual.update_layout(
+        title='Variação percentual do consumo do governo anual',
+        xaxis_title='Trimestral',
+        yaxis_title='Variação %',
+        template='seaborn'
+    )
+
+    return fig_var_desp_gov_anual
+
+
+@st.cache_data
+def variacao_acumulada_pib_consumo_fbcf():
+    # Taxa acumulada em quatro trimestres (em relação ao mesmo período do ano anterior) (%) "PIB" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6562/p/all/c11255/90707/d/v6562%201
+    pib_taxa_acumulada = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6562',
+        classifications={'11255':'90707'},
+        period='all',
+    )
+    # Selecionando as principais colunas
+    pib_taxa_acumulada = pib_taxa_acumulada[['D2C', 'V']]
+    # Retirando a primeira linha
+    pib_taxa_acumulada = pib_taxa_acumulada[1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    pib_taxa_acumulada['V'] = pib_taxa_acumulada['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    pib_taxa_acumulada['V'] = pib_taxa_acumulada['V'].astype(float)
+
+    # Taxa acumulada em quatro trimestres (em relação ao mesmo período do ano anterior) (%) "Despesas de consumo das famílias"- https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6562/p/all/c11255/93404/d/v6562%201
+    desp_familias_taxa_acumulada = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6562',
+        classifications={'11255':'93404'},
+        period='all',
+    )
+    # Selecionando as principais colunas
+    desp_familias_taxa_acumulada = desp_familias_taxa_acumulada[['D2C', 'V']]
+    # Retirando a primeira linha
+    desp_familias_taxa_acumulada = desp_familias_taxa_acumulada[1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    desp_familias_taxa_acumulada['V'] = desp_familias_taxa_acumulada['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    desp_familias_taxa_acumulada['V'] = desp_familias_taxa_acumulada['V'].astype(float)
+
+    # Taxa acumulada em quatro trimestres (em relação ao mesmo período do ano anterior) (%) "Despesas de consumo do governo" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6562/p/all/c11255/93405/d/v6562%201
+    desp_gov_taxa_acumulada = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6562',
+        classifications={'11255':'93404'},
+        period='all',
+    )
+    # Selecionando as principais colunas
+    desp_gov_taxa_acumulada = desp_gov_taxa_acumulada[['D2C', 'V']]
+    # Retirando a primeira linha
+    desp_gov_taxa_acumulada = desp_gov_taxa_acumulada[1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    desp_gov_taxa_acumulada['V'] = desp_gov_taxa_acumulada['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    desp_gov_taxa_acumulada['V'] = desp_gov_taxa_acumulada['V'].astype(float)
+
+    # Taxa acumulada em quatro trimestres (em relação ao mesmo período do ano anterior) (%) "FBCF" - https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/6562/p/all/c11255/93406/d/v6562%201
+    fbcf_taxa_acumulada = sidra.get_table(
+        table_code='5932',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        variable='6562',
+        classifications={'11255':'93406'},
+        period='all',
+    )
+    # Selecionando as principais colunas
+    fbcf_taxa_acumulada = fbcf_taxa_acumulada[['D2C', 'V']]
+    # Retirando a primeira linha
+    fbcf_taxa_acumulada = fbcf_taxa_acumulada[1:]
+    # Em uma linha da coluna 'V' possui a string '...'. Trocando essa string por um zero
+    fbcf_taxa_acumulada['V'] = fbcf_taxa_acumulada['V'].replace('...', '0')
+    # Transformando a coluna 'V' em float
+    fbcf_taxa_acumulada['V'] = fbcf_taxa_acumulada['V'].astype(float)
+
+    # Plotando a 'Taxa Acumulada PIB x Consumo das famílias/governo x FBCF'
+    fig_variacao_acumulada_pib_consumo_fbcf = go.Figure()
+
+    fig_variacao_acumulada_pib_consumo_fbcf.add_trace(go.Scatter(
+        x=pib_taxa_acumulada['D2C'],
+        y=pib_taxa_acumulada['V'],
+        mode='lines',
+        name='PIB')
+    )
+
+    fig_variacao_acumulada_pib_consumo_fbcf.add_trace(go.Scatter(
+        x=desp_familias_taxa_acumulada['D2C'],
+        y=desp_familias_taxa_acumulada['V'],
+        mode='lines',
+        name='Consumo das famílias')
+    )
+
+    fig_variacao_acumulada_pib_consumo_fbcf.add_trace(go.Scatter(
+        x=desp_gov_taxa_acumulada['D2C'],
+        y=desp_gov_taxa_acumulada['V'],
+        mode='lines',
+        name='Consumo do governo')
+    )
+
+    fig_variacao_acumulada_pib_consumo_fbcf.add_trace(go.Scatter(
+        x=fbcf_taxa_acumulada['D2C'],
+        y=fbcf_taxa_acumulada['V'],
+        mode='lines',
+        name='FBCF')
+    )
+
+    fig_variacao_acumulada_pib_consumo_fbcf.update_layout(
+        title='Taxa Acumulada PIB x Consumo das famílias/governo x FBCF',
+        xaxis_title='Trimestral',
+        yaxis_title='Percentual (%)',
+        template='seaborn'
+    )
+
+    fig_variacao_acumulada_pib_consumo_fbcf.add_hline(y=0, line_width=1, line_color='black')
+
+    return fig_variacao_acumulada_pib_consumo_fbcf
+
+
+@st.cache_data
+def otica_producao_demanda():
+    # PIB a mercado - https://apisidra.ibge.gov.br/values/t/1621/n1/all/v/all/p/all/c11255/90707/d/v584%202
+    pib_mercado = sidra.get_table(
+        table_code='1621',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        classifications={'11255':'90707'},
+        period='all'
+    )
+    # Selecionando as principais colunas
+    pib_mercado = pib_mercado[['D2C', 'V']]
+    # Retirando a primeira linha
+    pib_mercado = pib_mercado[1:]
+    # Transformando a coluna 'V' em float
+    pib_mercado['V'] = pib_mercado['V'].astype(float)
+
+    # Agropecuária total - https://apisidra.ibge.gov.br/values/t/1621/n1/all/v/all/p/all/c11255/90687/d/v584%202
+    agropecuaria = sidra.get_table(
+        table_code='1621',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        classifications={'11255':'90687'},
+        period='all'
+    )
+    # Selecionando as principais colunas
+    agropecuaria = agropecuaria[['D2C', 'V']]
+    # Retirando a primeira linha
+    agropecuaria = agropecuaria[1:]
+    # Transformando a coluna 'V' em float
+    agropecuaria['V'] = agropecuaria['V'].astype(float)
+
+    # Indústria total - https://apisidra.ibge.gov.br/values/t/1621/n1/all/v/all/p/all/c11255/90691/d/v584%202
+    industria = sidra.get_table(
+        table_code='1621',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        classifications={'11255':'90691'},
+        period='all'
+    )
+    # Selecionando as principais colunas
+    industria = industria[['D2C', 'V']]
+    # Retirando a primeira linha
+    industria = industria[1:]
+    # Transformando a coluna 'V' em float
+    industria['V'] = industria['V'].astype(float)
+
+    # Serviços total - https://apisidra.ibge.gov.br/values/t/1621/n1/all/v/all/p/all/c11255/90696/d/v584%202
+    servicos = sidra.get_table(
+        table_code='1621',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        classifications={'11255':'90696'},
+        period='all'
+    )
+    # Selecionando as principais colunas
+    servicos = servicos[['D2C', 'V']]
+    # Retirando a primeira linha
+    servicos = servicos[1:]
+    # Transformando a coluna 'V' em float
+    servicos['V'] = servicos['V'].astype(float)
+
+    # Formação Bruta de Capital Fixo - https://apisidra.ibge.gov.br/values/t/1621/n1/all/v/all/p/all/c11255/93406/d/v584%202
+    fbcf = sidra.get_table(
+        table_code='1621',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        classifications={'11255':'93406'},
+        period='all'
+    )
+    # Selecionando as principais colunas
+    fbcf = fbcf[['D2C', 'V']]
+    # Retirando a primeira linha
+    fbcf = fbcf[1:]
+    # Transformando a coluna 'V' em float
+    fbcf['V'] = fbcf['V'].astype(float)
+
+    # Despesas de consumo das famílias - https://apisidra.ibge.gov.br/values/t/1621/n1/all/v/all/p/all/c11255/93404/d/v584%202
+    despesas_familias = sidra.get_table(
+        table_code='1621',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        classifications={'11255':'93404'},
+        period='all'
+    )
+    # Selecionando as principais colunas
+    despesas_familias = despesas_familias[['D2C', 'V']]
+    # Retirando a primeira linha
+    despesas_familias = despesas_familias[1:]
+    # Transformando a coluna 'V' em float
+    despesas_familias['V'] = despesas_familias['V'].astype(float)
+
+    # Despesas de consumo do governo - https://apisidra.ibge.gov.br/values/t/1621/n1/all/v/all/p/all/c11255/93405/d/v584%202
+    despesas_gov = sidra.get_table(
+        table_code='1621',
+        territorial_level=1,
+        ibge_territorial_code='all',
+        classifications={'11255':'93405'},
+        period='all'
+    )
+    # Selecionando as principais colunas
+    despesas_gov = despesas_gov[['D2C', 'V']]
+    # Retirando a primeira linha
+    despesas_gov = despesas_gov[1:]
+    # Transformando a coluna 'V' em float
+    despesas_gov['V'] = despesas_gov['V'].astype(float)
+
+    # Plotando 'Patamar PIB - Ótica da Produção - série encadeada c/ ajuste sazonal'
+    fig_otica_producao = go.Figure()
+
+    fig_otica_producao.add_trace(go.Scatter(
+        x=pib_mercado['D2C'],
+        y=pib_mercado['V'],
+        mode='lines',
+        name='PIB')
+    )
+
+    fig_otica_producao.add_trace(go.Scatter(
+        x=agropecuaria['D2C'],
+        y=agropecuaria['V'],
+        mode='lines',
+        name='Agropecuária')
+    )
+
+    fig_otica_producao.add_trace(go.Scatter(
+        x=industria['D2C'],
+        y=industria['V'],
+        mode='lines',
+        name='Indústria')
+    )
+
+    fig_otica_producao.add_trace(go.Scatter(
+        x=servicos['D2C'],
+        y=servicos['V'],
+        mode='lines',
+        name='Serviços')
+    )
+
+    fig_otica_producao.update_layout(
+        title='Patamar PIB - Ótica da Produção - série encadeada c/ ajuste sazonal',
+        xaxis_title='Trimestral',
+        yaxis_title='R$',
+        template='seaborn'
+    )
+
+    # Plotando 'Patamar PIB - Ótica da Demanda - série encadeada c/ ajuste sazonal'
+    fig_otica_demanda = go.Figure()
+
+    fig_otica_demanda.add_trace(go.Scatter(
+        x=pib_mercado['D2C'],
+        y=pib_mercado['V'],
+        mode='lines',
+        name='PIB')
+    )
+
+    fig_otica_demanda.add_trace(go.Scatter(
+        x=fbcf['D2C'],
+        y=fbcf['V'],
+        mode='lines',
+        name='FBCF')
+    )
+
+    fig_otica_demanda.add_trace(go.Scatter(
+        x=despesas_familias['D2C'],
+        y=despesas_familias['V'],
+        mode='lines',
+        name='Consumo das Famílias')
+    )
+
+    fig_otica_demanda.add_trace(go.Scatter(
+        x=despesas_gov['D2C'],
+        y=despesas_gov['V'],
+        mode='lines',
+        name='Consumo do Governo')
+    )
+
+    fig_otica_demanda.update_layout(
+        title='Patamar PIB - Ótica da Demanda - série encadeada c/ ajuste sazonal',
+        xaxis_title='Trimestral',
+        yaxis_title='R$',
+        template='seaborn'
+    )
+
+    return fig_otica_producao, fig_otica_demanda
+
+
+@st.cache_data
+def exportacoes_importacoes():
+    # Exportações - https://apisidra.ibge.gov.br/values/t/1621/n1/all/v/all/p/all/c11255/93407/d/v584%202
+    exportacoes = sidra.get_table(
+        table_code='1621',
+        territorial_level=1,
+        variable='all',
+        ibge_territorial_code='all',
+        classifications={'11255':'93407'},
+        period='all'
+    )
+
+    # Selecionando as principais colunas
+    exportacoes = exportacoes[['D2C', 'V']]
+    # Retirando a primeira linha
+    exportacoes = exportacoes[1:]
+    # Transformando a coluna 'V' em float
+    exportacoes['V'] = exportacoes['V'].astype(float)
+    # Renomeando as colunas
+    exportacoes = exportacoes.rename(columns={'D2C':'data', 'V':'exportacoes'})
+    # Definindo a coluna 'data' como index
+    exportacoes = exportacoes.set_index('data')
+
+    # Importações https://apisidra.ibge.gov.br/values/t/1621/n1/all/v/all/p/all/c11255/93408/d/v584%202
+    importacoes = sidra.get_table(
+        table_code='1621',
+        territorial_level=1,
+        variable='all',
+        ibge_territorial_code='all',
+        classifications={'11255':'93408'},
+        period='all'
+    )
+
+    # Selecionando as principais colunas
+    importacoes = importacoes[['D2C', 'V']]
+    # Retirando a primeira linha
+    importacoes = importacoes[1:]
+    # Transformando a coluna 'V' em float
+    importacoes['V'] = importacoes['V'].astype(float)
+    # Renomeando as colunas
+    importacoes = importacoes.rename(columns={'D2C':'data', 'V':'importacoes'})
+    # Definindo a coluna 'data' como index
+    importacoes = importacoes.set_index('data')
+
+    # Juntando os dois dfs
+    balanca_comercial = pd.merge(exportacoes, importacoes, left_index=True, right_index=True)
+    # Calculando o superavit ou deficit da balança comercial
+    balanca_comercial['saldo'] = balanca_comercial['exportacoes'] - balanca_comercial['importacoes']
+
+    # Plotando a exportação x importação
+    fig_exportacoes_importacoes = go.Figure()
+
+    fig_exportacoes_importacoes.add_trace(go.Scatter(
+        x=balanca_comercial.index,
+        y=balanca_comercial['exportacoes'],
+        mode='lines',
+        name='Exportações')
+    )
+
+    fig_exportacoes_importacoes.add_trace(go.Scatter(
+        x=balanca_comercial.index,
+        y=balanca_comercial['importacoes'],
+        mode='lines',
+        name='Importações')
+    )
+
+    fig_exportacoes_importacoes.update_layout(
+        title='Exportação e Importação',
+        xaxis_title='Trimestral',
+        yaxis_title='R$',
+        template='seaborn'
+    )
+
+    # Plotando o saldo da balança comercial
+    fig_saldo_balanca_comercial = go.Figure()
+    
+    fig_saldo_balanca_comercial.add_trace(go.Scatter(
+        x=balanca_comercial.index,
+        y=balanca_comercial['saldo'],
+        mode='lines',
+        name='Saldo')
+    )
+
+    fig_saldo_balanca_comercial.update_layout(
+        title='Saldo da Balança Comercial - Superavit ou Deficit',
+        xaxis_title='Trimestral',
+        yaxis_title='R$',
+        template='seaborn'
+    )
+
+    fig_saldo_balanca_comercial.add_hline(
+        y=0, 
+        line_width=1, 
+        line_color='red'
+    )
+
+    return fig_exportacoes_importacoes, fig_saldo_balanca_comercial
 
 
 # EMBI+
