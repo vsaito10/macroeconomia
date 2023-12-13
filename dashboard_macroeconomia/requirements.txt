@@ -4,3 +4,5 @@ yfinance
 pandas_ta
 ipeadatapy
 python-bcb
+sidrapy
+C:/Users/vitor/projetos_python/python_b3/macroeconomia/dashboard_macroeconomia/Lib/site-packages/beaapi-0.0.2-py3-none-any.whl
